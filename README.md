@@ -1,5 +1,5 @@
 # vue-laser-backend in Java
-The config file is in `src/resources/application.yml`. Rename the default `application.yml.sample` to `application.yml`, or it won't work. 
+The config file is in `src/main/resources/application.yml`. Rename the default `application.yml.sample` to `application.yml`, or it won't work. 
 
 Import `sql/jiguang.sql` to MySQL/MariaDB. Check if the configuration is right and run it in Maven (Maybe?)
 
