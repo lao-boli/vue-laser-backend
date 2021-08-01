@@ -15,4 +15,4 @@ Use `maven-assembly-plugin`
  - [maven-assembly 打包bin 使用start.sh 执行 springcloud 项目](https://blog.csdn.net/yt438936731/article/details/106401279)
  - [使用assembly 插件定制化打包项目](https://www.jianshu.com/p/64c880359864)
 
-I barely know anything in Java. So I leave it to you. 
+I barely know anything about Java. So I leave it to you. 
