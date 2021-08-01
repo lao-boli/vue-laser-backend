@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hquyyp.dao.NewBattleSettingMapper">
+
+    <resultMap id="BaseResultMap" type="com.hquyyp.domain.po.BattleNewSetting">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="map_id" jdbcType="VARCHAR" property="mapId"/>
+        <result column="red_team_list" jdbcType="VARCHAR" property="redTeamList"/>
+        <result column="blue_team_list" jdbcType="VARCHAR" property="blueTeamList"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, map_id, red_team_list, blue_team_list
+    </sql>
+
+    <insert id="insertBattleSetting" parameterType="com.hquyyp.domain.po.BattleNewSetting">
+        insert into t_battle_new_setting (id, name, map_id, red_team_list, blue_team_list)
+        values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{mapId,jdbcType=VARCHAR},
+        #{redTeamList,jdbcType=VARCHAR}, #{blueTeamList,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="listBattleSettingByQueryPage" resultType="com.hquyyp.domain.model.NewBattleSettingDaoModel">
+        select
+        t1.id, t1.name, map_id, red_team_list, blue_team_list, t2.name mapName
+        FROM
+        t_battle_new_setting t1
+        LEFT JOIN t_map t2 ON t1.map_id = t2.id
+        WHERE 1=1
+        <if test="name != null">
+            and t1.name like concat('%',#{name},'%')
+        </if>
+        <if test="mapName != null">
+            and t2.name like concat('%',#{mapName},'%')
+        </if>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from t_battle_new_setting
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <update id="updateByPrimaryKey" parameterType="com.hquyyp.domain.po.BattleNewSetting">
+        update t_battle_new_setting
+        set name = #{name,jdbcType=VARCHAR},
+        map_id = #{mapId,jdbcType=VARCHAR},
+        red_team_list = #{redTeamList,jdbcType=VARCHAR},
+        blue_team_list = #{blueTeamList,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_battle_new_setting
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

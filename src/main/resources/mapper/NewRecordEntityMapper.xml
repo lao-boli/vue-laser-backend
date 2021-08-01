@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hquyyp.dao.NewRecordEntityMapper">
+
+    <sql id="Base_Column_List">
+        t_new_record.id, battle_id, path, time,record_data,
+         t_new_battle.name, t_new_battle.begin_time, t_new_battle.end_time
+    </sql>
+
+    <resultMap id="BaseResultMap" type="com.hquyyp.domain.model.NewRecordDaoModel">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="battle_id" jdbcType="VARCHAR" property="battleId"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="time" jdbcType="TIMESTAMP" property="time"/>
+        <result column="record_data" jdbcType="VARCHAR" property="recordData"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="begin_time" jdbcType="TIMESTAMP" property="beginTime"/>
+        <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    </resultMap>
+
+    <insert id="insertSelective" parameterType="com.hquyyp.domain.po.NewRecord">
+        insert into t_new_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="battleId != null">
+                battle_id,
+            </if>
+            <if test="path != null">
+                path,
+            </if>
+
+            <if test="time != null">
+                time,
+            </if>
+            <if test="recordData != null">
+                record_data,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="battleId != null">
+                #{battleId,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="time != null">
+                #{time,jdbcType=TIMESTAMP},
+            </if>
+            <if test="recordData != null">
+                #{recordData,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="listRecordByQueryPage" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_new_record left join t_new_battle
+        on t_new_record.battle_id=t_new_battle.id
+        <if test="name != null">
+            and t_new_battle.name like concat('%',#{name},'%')
+        </if>
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultType="com.hquyyp.domain.model.NewRecordDaoModel">
+        select
+        <include refid="Base_Column_List"/>
+        from t_new_record left join t_new_battle
+        on t_new_record.battle_id=t_new_battle.id
+        where t_new_record.id = #{id,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

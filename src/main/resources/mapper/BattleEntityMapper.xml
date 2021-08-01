@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hquyyp.dao.BattleEntityMapper">
+    <resultMap id="BaseResultMap" type="com.hquyyp.domain.entity.BattleEntity">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="map_id" jdbcType="VARCHAR" property="mapId"/>
+        <result column="begin_time" jdbcType="TIMESTAMP" property="beginTime"/>
+        <result column="end_time" jdbcType="TIMESTAMP" property="endTime"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, name, map_id, begin_time, end_time, status, remark
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_battle
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+    <select id="listBattleByQuery" resultType="com.hquyyp.domain.entity.BattleEntity">
+        select
+        <include refid="Base_Column_List"/>
+        FROM
+        t_battle t1
+        WHERE 1=1
+        <if test="name != null">
+            and t1.name like concat('%',#{name},'%')
+        </if>
+        order by t1.begin_time DESC
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from t_battle
+        where id = #{id,jdbcType=VARCHAR};
+
+        delete from t_battle_record
+        where battle_id=#{id,jdbcType=VARCHAR};
+    </delete>
+    <insert id="insert" parameterType="com.hquyyp.domain.entity.BattleEntity">
+        insert into t_battle (id, name, map_id,
+        begin_time, end_time, status,
+        remark)
+        values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{mapId,jdbcType=VARCHAR},
+        #{beginTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER},
+        #{remark,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.hquyyp.domain.entity.BattleEntity">
+        insert into t_battle
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="mapId != null">
+                map_id,
+            </if>
+            <if test="beginTime != null">
+                begin_time,
+            </if>
+            <if test="endTime != null">
+                end_time,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="mapId != null">
+                #{mapId,jdbcType=VARCHAR},
+            </if>
+            <if test="beginTime != null">
+                #{beginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hquyyp.domain.entity.BattleEntity">
+        update t_battle
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="mapId != null">
+                map_id = #{mapId,jdbcType=VARCHAR},
+            </if>
+            <if test="beginTime != null">
+                begin_time = #{beginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                end_time = #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hquyyp.domain.entity.BattleEntity">
+        update t_battle
+        set name = #{name,jdbcType=VARCHAR},
+        map_id = #{mapId,jdbcType=VARCHAR},
+        begin_time = #{beginTime,jdbcType=TIMESTAMP},
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+        status = #{status,jdbcType=INTEGER},
+        remark = #{remark,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="endAll">
+        update t_battle
+        set
+        end_time = now(),
+        status=2
+        WHERE status=1
+    </update>
+
+</mapper>
