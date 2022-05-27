@@ -56,19 +56,21 @@ public class ChirpStackService {
      * @author liulingyu <br>
      */
     public void login() {
+        //构建登录链接
         StringBuffer urlBuf = new StringBuffer(baseURL);
 
         urlBuf.append("/api/internal/login");
 
-        Map requestMap = new HashMap<>(16);
+        //构建登录参数
+        Map<String,String> requestMap = new HashMap<>(16);
 
         requestMap.put("email", email);
         requestMap.put("password", password);
 
         JSONObject body = restTemplate.postForEntity(urlBuf.toString() , requestMap, JSONObject.class).getBody();
 
+        //获取返回的jwt令牌
         jwt = (String) body.get("jwt");
-
 
         log.info(JSON.toJSONString(body));
 
@@ -86,35 +88,35 @@ public class ChirpStackService {
      */
     public Map<String,Object> getDeviceList(BaseQueryEntity query) {
         login();
-
+        //构建请求链接
         StringBuffer urlBuf = new StringBuffer(baseURL);
 
         urlBuf.append("/api/devices");
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlBuf.toString());
 
-
+        //设置授权请求头
         HttpHeaders headers = new HttpHeaders();
         headers.set("Grpc-Metadata-Authorization", jwt);
 
-
+        //构建请求参数
         Map<String,Object> requestMap = new HashMap<>(16);
 
         requestMap.put("limit", query.getPageSize());
         requestMap.put("applicationID", applicationID);
 
+        //如果请求页数不是第一页，则请求参数中加上偏离值
         if (query.getPage() > 1) {
             requestMap.put("offset", query.getPageSize() * (query.getPage() - 1));
 
         }
 
+        //遍历请求参数map，在请求url中拼接参数
         if (!requestMap.isEmpty()) {
-            requestMap.forEach((key, value) -> {
-                builder.queryParam((String) key, value);
-            });
+            requestMap.forEach(builder::queryParam);
         }
 
-
+        //构建http请求对象
         HttpEntity<Object> httpEntity = new HttpEntity<>(null, headers);
 
         ResponseEntity<JSONObject> responseEntity = restTemplate.exchange(builder.build().toString(), HttpMethod.GET, httpEntity, JSONObject.class);
@@ -139,10 +141,11 @@ public class ChirpStackService {
      */
 
     public Map<String,Object> getDevEUIList() {
-        Map deviceList = getDeviceList(new BaseQueryEntity(1, 999));
+        //获取所有的设备列表，页数设置为999或大于设备总数的数字
+        Map<String,Object> deviceList = getDeviceList(new BaseQueryEntity(1, 999));
 
+        //遍历设备列表，取出devEUI构成新的列表
         List<String> devEUIList = ((List<LinkedHashMap<String, String>>) deviceList.get("deviceList"))
-
                 .stream()
                 .map(device -> device.get("devEUI"))
                 .collect(Collectors.toList());
@@ -167,13 +170,14 @@ public class ChirpStackService {
      */
     public void deleteDeviceByEUI(String devEUI) {
         login();
+        //构建请求链接
         StringBuffer urlBuf = new StringBuffer(baseURL);
 
         urlBuf.append("/api/devices/");
 
         urlBuf.append(devEUI);
 
-
+        //设置请求头
         HttpHeaders headers = new HttpHeaders();
         headers.set("Grpc-Metadata-Authorization", jwt);
 
