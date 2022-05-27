@@ -137,6 +137,7 @@ public class ChirpStackService {
      * @date 2022/5/26 17:34 <br>
      * @author liulingyu <br>
      */
+
     public Map<String,Object> getDevEUIList() {
         Map deviceList = getDeviceList(new BaseQueryEntity(1, 999));
 

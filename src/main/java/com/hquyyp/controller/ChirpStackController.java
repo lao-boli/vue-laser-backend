@@ -5,10 +5,7 @@ import com.hquyyp.domain.query.BaseQueryEntity;
 import com.hquyyp.service.ChirpStackService;
 import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Map;
@@ -44,7 +41,7 @@ public class ChirpStackController {
                 .build();
     }
 
-    @GetMapping("/get-devices")
+    @PostMapping("/get-devices")
     public BaseResponse getDevices(@RequestBody BaseQueryEntity query){
 
         Map deviceList = chirpStackService.getDeviceList(query);
