@@ -1,0 +1,96 @@
+# It's a example of config file
+# rename it as "application.yml" and modify it
+
+server:
+  port: 8010
+spring:
+  jackson:
+    time-zone: GMT+8
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #数据库连接地址
+    url: jdbc:mysql://127.0.0.1:3306/battle?useSSL=false&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&serverTimezone=GMT%2b8
+    #数据库密码
+    username: root
+    #数据库用户名
+    # dbname : battle
+    # password: yuyingpeng
+    password: root
+    type: com.alibaba.druid.pool.DruidDataSource
+    initialSize: 1
+    maxActive: 20
+    maxOpenPreparedStatements: 20
+    maxWait: 60000
+    minEvictableIdleTimeMillis: 300000
+    minIdle: 1
+    poolPreparedStatements: true
+    testOnBorrow: false
+    testOnReturn: false
+    testWhileIdle: true
+    timeBetweenEvictionRunsMillis: 60000
+
+    validation-query: select 1
+    validationQuery: select 'x'
+  application:
+    name: soldier-confrontation-drill-system
+chirp-stack:
+  baseURL: http://192.168.1.103:8080
+  #baseURL: http://127.0.0.1:8080
+  email: admin
+  password: admin
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X2lkIjoiNzQyN2Y4ZTUtZTA4Zi00ZTI2LWI2M2MtNDViOTRlOTIxOTFlIiwiYXVkIjoiYXMiLCJpc3MiOiJhcyIsIm5iZiI6MTY1MzcyNTc3MSwic3ViIjoiYXBpX2tleSJ9.9ZSSfJYSXWTvC2tdUvYo0cB9JKfgA2yska6uv9Cucss
+  applicationID: 2
+
+#mqtt配置
+mq:
+  #host: tcp://154.223.172.167:1883
+  host: tcp://127.0.0.1:1883
+  clientId: client_1
+  topic: application/2/device/+/rx
+  qos: 2
+  username:
+  password:
+  timeout: 1000
+  keepalive: 20
+  PublishTopicPrefix: application/2/device/
+  PublishTopicSuffix: /tx
+  publishtopic: application/2/device/aFakeDeviceId/tx
+#订阅话题的前缀
+PublishTopicPrefix: application/2/device/
+#订阅话题的后缀
+PublishTopicSuffix: /tx
+
+mybatis:
+  configuration:
+    cache-enabled: true
+    lazy-loading-enabled: true
+    aggressive-lazy-loading: false
+    multiple-result-sets-enabled: true
+    use-column-label: true
+    use-generated-keys: true
+    auto-mapping-behavior: full
+    default-executor-type: simple
+    default-statement-timeout: 25000
+    call-setters-on-nulls: true
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+
+pollingTimeOut: 100
+
+
+# I don't know how why he choose to do this but whatever. 
+
+# 演习回放视频存放地址
+RECORD_DIR: d:/record/
+
+# 演习回放视频存放地址
+LINUX_RECORD_DIR: /usr/local/JiGuangVideo/
+
+# 地图图片存放地址
+MAP_DIR: d:/mapImg/
+
+# linux系统图片存放地址
+LINUX_MAP_DIR: /usr/local/JiGuangPicture/
+
+# 是否运行在linux系统，0为windows，1为linux
+IN_LINUX: 1
