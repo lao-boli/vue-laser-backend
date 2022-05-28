@@ -40,8 +40,8 @@ public class ChirpStackService {
     private String email;
     private String password;
     private String applicationID;
+    private String token;
 
-    private String jwt = "";
 
 
     @Autowired
@@ -70,7 +70,7 @@ public class ChirpStackService {
         JSONObject body = restTemplate.postForEntity(urlBuf.toString() , requestMap, JSONObject.class).getBody();
 
         //获取返回的jwt令牌
-        jwt = (String) body.get("jwt");
+        token = (String) body.get("jwt");
 
         log.info(JSON.toJSONString(body));
 
@@ -87,7 +87,7 @@ public class ChirpStackService {
      * @author liulingyu <br>
      */
     public Map<String,Object> getDeviceList(BaseQueryEntity query) {
-        login();
+        //login();
         //构建请求链接
         StringBuffer urlBuf = new StringBuffer(baseURL);
 
@@ -97,7 +97,7 @@ public class ChirpStackService {
 
         //设置授权请求头
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Grpc-Metadata-Authorization", jwt);
+        headers.set("Grpc-Metadata-Authorization", token);
 
         //构建请求参数
         Map<String,Object> requestMap = new HashMap<>(16);
@@ -169,7 +169,7 @@ public class ChirpStackService {
      * @author liulingyu <br>
      */
     public void deleteDeviceByEUI(String devEUI) {
-        login();
+        //login();
         //构建请求链接
         StringBuffer urlBuf = new StringBuffer(baseURL);
 
@@ -179,7 +179,7 @@ public class ChirpStackService {
 
         //设置请求头
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Grpc-Metadata-Authorization", jwt);
+        headers.set("Grpc-Metadata-Authorization", token);
 
         HttpEntity<Object> httpEntity = new HttpEntity<>(null, headers);
 
