@@ -153,6 +153,13 @@ public class NewBattleService {
 
     }
 
+    public void newInitBattle(String id){
+        BattleNewSetting battleSettingEntity = this.newBattleSettingMapper.selectByPrimaryKey(id);
+
+        this.recordData=new ArrayList<>();
+        this.vestService.NewLoadVest(battleSettingEntity);
+    }
+
     public void newEndBattle() {
         this.sendEndSignal();
         this.newBattleEntityMapper.endAll();

@@ -73,6 +73,28 @@ public class NewBattleController {
                 .build();
     }
 
+    @ApiOperation(value = "新初始化对局按钮",httpMethod = "GET",notes = "选择已创建对局设置id后开启对局")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name="id",value = "id标识",required = true,paramType = "query", dataType = "String")
+    )
+    @GetMapping({"/newinit"})
+    public BaseResponse newInitBattle(@RequestParam("id") String id) {
+        try {
+            this.battleService.newInitBattle(id);
+        } catch (Exception e) {
+            return BaseResponse.builder()
+                    .code(400003)
+                    .status("")
+                    .msg("")
+                    .build();
+        }
+        return BaseResponse.builder()
+                .code(200)
+                .status("SUCCESS")
+                .msg("")
+                .build();
+    }
+
     @ApiOperation(value = "新开始对局按钮",httpMethod = "GET",notes = "选择已创建对局设置id后开启对局")
     @ApiImplicitParams(
             @ApiImplicitParam(name="id",value = "id标识",required = true,paramType = "query", dataType = "String")
