@@ -216,7 +216,8 @@ public class NewVestService {
                 this.vestEntityList.remove(shootee);
                 if (shooter!=null && shootee!=null){
                     //首先刷新被击中者血量
-                    if (shootee.getHp() > 34) {
+                    // 若hp大于34且被击中部位不是头部
+                    if (shootee.getHp() > 34 && !"头部".equals(position)) {
                         shootee.setHp(shootee.getHp()-33);
                         //非击杀数据
                         for (NewRecordEntity nre:this.newBattleService.getRecordData()) {
@@ -231,7 +232,7 @@ public class NewVestService {
                                 //System.out.println("shooter"+nre.toString());
                             }
                         }
-                    } else if (shootee.getHp()<=34){
+                    } else if (shootee.getHp()<=34 || "头部".equals(position)){
                         shootee.setHp(0);
                         //击杀数据
                         for (NewRecordEntity nre:this.newBattleService.getRecordData()) {
@@ -309,7 +310,8 @@ public class NewVestService {
                     //做存亡处理
                     int shootNum=Integer.parseInt(dataSplit[4])+Integer.parseInt(dataSplit[5]);
                     int hp;
-                    if(shootNum<0 || shootNum>2){
+                    //若头部中弹，直接死亡
+                    if(shootNum<0 || shootNum>2 || Integer.parseInt(dataSplit[5]) >0){
                         hp=0;
                     }else {
                         hp = 100 - (33 * shootNum);
