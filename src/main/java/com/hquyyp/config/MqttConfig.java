@@ -139,6 +139,8 @@ public class MqttConfig {
         for (int i=0;i<bytes.length;i++){
            data[i]= bytes[i] & 0xff;
         }
+        log.info("received byte array: " + Arrays.toString(data));
+        log.info("convert to int array: " + Arrays.toString(bytes));
         //位置报送
         if (data.length==15){
             int type=data[14];
@@ -170,8 +172,6 @@ public class MqttConfig {
             int isUpdate=data[1];
             int position=data[0];
             DATA=type+" "+shooter+" "+shootee+" "+position+" "+isUpdate;
-            log.info("received byte array: " + Arrays.toString(data));
-            log.info("convert to int array: " + Arrays.toString(bytes));
             log.info("encode data: " + DATA);
         }
         return DATA;
