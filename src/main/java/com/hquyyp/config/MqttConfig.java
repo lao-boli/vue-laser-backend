@@ -25,6 +25,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 import java.lang.String;
 
@@ -160,6 +161,18 @@ public class MqttConfig {
             int shooter=data[1]*256+data[2];
             int position=data[0];
             DATA=type+" "+shooter+" "+shootee+" "+position;
+        }
+        // 带state的hit数据
+        if (data.length==7){
+            int type=data[6];
+            int shootee=data[4]*256+data[5];
+            int shooter=data[2]*256+data[3];
+            int isUpdate=data[1];
+            int position=data[0];
+            DATA=type+" "+shooter+" "+shootee+" "+position+" "+isUpdate;
+            log.info("received byte array: " + Arrays.toString(data));
+            log.info("convert to int array: " + Arrays.toString(bytes));
+            log.info("encode data: " + DATA);
         }
         return DATA;
     }

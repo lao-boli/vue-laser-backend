@@ -173,11 +173,15 @@ public class NewVestService {
         }catch (Exception e){
             logger.info("【mqtt接收】数据格式不符合规范");
         }
-        //数据类型 射击者 被射击者 击中部位
-        //    0     1       2       3
+        //数据类型 射击者 被射击者 击中部位 是否是更新的数据
+        //    0     1       2       3      4
         if("91".equals(dataSplit[0])) {
             //射击逻辑
-            if (dataSplit.length == 4) {
+            if (dataSplit.length == 5) {
+                // 如果标志位为0，说明不是更新的数据，即为重复发送的数据，丢弃
+                if (dataSplit[4].equals("0")){
+                    return;
+                }
                 String position="";
                 switch (Integer.parseInt(dataSplit[3])) {
                     case 1:
