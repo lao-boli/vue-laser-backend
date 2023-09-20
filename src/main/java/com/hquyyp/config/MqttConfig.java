@@ -121,11 +121,24 @@ public class MqttConfig {
         return message -> {
             String topic = (String)message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC);
             int qos = (int) message.getHeaders().get(MqttHeaders.RECEIVED_QOS);
-            JSONObject MqttData = JSON.parseObject(message.getPayload().toString());
+            JSONObject MqttData = null;
+            try {
+                MqttData = JSON.parseObject(message.getPayload().toString());
+            } catch (Exception e) {
+                log.warning("json decode fail："+ message.getPayload());
+                return;
+            }
             String data = MqttData.getString("data");
             log.info("主题："+topic+"，数据："+ message.getPayload()+"，QOS："+qos);
             log.info("data："+ data);
-            byte[] decode = Base64.decode(data);
+
+            byte[] decode;
+            try {
+                decode = Base64.decode(data);
+            } catch (Exception e) {
+                log.warning("Base64 decode fail: data: " + data);
+                return;
+            }
             String DATA = HexToString(decode);
             //log.info("解析后数据："+ DATA);
             vestService.handleVestMqData(DATA);
