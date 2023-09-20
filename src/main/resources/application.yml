@@ -34,29 +34,30 @@ spring:
   application:
     name: soldier-confrontation-drill-system
 chirp-stack:
-  baseURL: http://192.168.1.103:8080
+  baseURL: http://192.168.2.59:8080
   #baseURL: http://127.0.0.1:8080
   email: admin
   password: admin
-  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X2lkIjoiNzQyN2Y4ZTUtZTA4Zi00ZTI2LWI2M2MtNDViOTRlOTIxOTFlIiwiYXVkIjoiYXMiLCJpc3MiOiJhcyIsIm5iZiI6MTY1MzcyNTc3MSwic3ViIjoiYXBpX2tleSJ9.9ZSSfJYSXWTvC2tdUvYo0cB9JKfgA2yska6uv9Cucss
+#  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X2lkIjoiNzQyN2Y4ZTUtZTA4Zi00ZTI2LWI2M2MtNDViOTRlOTIxOTFlIiwiYXVkIjoiYXMiLCJpc3MiOiJhcyIsIm5iZiI6MTY1MzcyNTc3MSwic3ViIjoiYXBpX2tleSJ9.9ZSSfJYSXWTvC2tdUvYo0cB9JKfgA2yska6uv9Cucss
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X2lkIjoiMDQyNGEyMDEtZTQ3Ni00M2JiLTgwYmUtZDYwNWE1YzM1YTIxIiwiYXVkIjoiYXMiLCJpc3MiOiJhcyIsIm5iZiI6MTY4OTA0MTQ0OSwic3ViIjoiYXBpX2tleSJ9.9UhQxvYohAj4pew9ZU040t55vXmgHst9dkbOhx-ZAsA
   applicationID: 2
 
 #mqtt配置
 mq:
-  #host: tcp://154.223.172.167:1883
-  host: tcp://127.0.0.1:1883
+  host: tcp://192.168.2.145:1883
+#  host: tcp://127.0.0.1:1883
   clientId: client_1
-  topic: application/2/device/+/rx
+  topic: application/1/device/+/rx
   qos: 2
   username:
   password:
   timeout: 1000
   keepalive: 20
-  PublishTopicPrefix: application/2/device/
+  PublishTopicPrefix: application/1/device/
   PublishTopicSuffix: /tx
-  publishtopic: application/2/device/aFakeDeviceId/tx
+  publishtopic: application/1/device/aFakeDeviceId/tx
 #订阅话题的前缀
-PublishTopicPrefix: application/2/device/
+PublishTopicPrefix: application/1/device/
 #订阅话题的后缀
 PublishTopicSuffix: /tx
 
@@ -78,7 +79,7 @@ mybatis:
 pollingTimeOut: 100
 
 
-# I don't know how why he choose to do this but whatever. 
+# I don't know how why he choose to do this but whatever.
 
 # 演习回放视频存放地址
 RECORD_DIR: d:/record/
@@ -93,4 +94,4 @@ MAP_DIR: d:/mapImg/
 LINUX_MAP_DIR: /usr/local/JiGuangPicture/
 
 # 是否运行在linux系统，0为windows，1为linux
-IN_LINUX: 1
+IN_LINUX: 0
