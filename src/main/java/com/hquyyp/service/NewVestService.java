@@ -187,6 +187,9 @@ public class NewVestService {
                     case 1:
                         position = "头部";
                         break;
+                    case 2:
+                        position = "腹部";
+                        break;
                     case 4:
                         position = "左手";
                         break;
@@ -217,8 +220,8 @@ public class NewVestService {
                         shootee=nvv;
                     }
                 }
-                this.vestEntityList.remove(shootee);
                 if (shooter!=null && shootee!=null){
+                    this.vestEntityList.remove(shootee);
                     //首先刷新被击中者血量
                     // 若hp大于34且被击中部位不是头部
                     if (shootee.getHp() > 34 && !"头部".equals(position)) {
