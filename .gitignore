@@ -1,4 +1,7 @@
+src/main/resources/rebel.xml
+src/main/resources/rebel-remote.xml
 .idea
+serialport.iml
 out
 server
 node_modules
