@@ -165,6 +165,10 @@ public class NewVestService {
     }
 
     public void handleVestMqData(String data){
+        //fixed: when train is not started, receiving data will cause NPE.
+        if (this.vestEntityList == null){
+            return;
+        }
         logger.info("【mqtt接收】接收"+data);
         String[] dataSplit=null;
         //拆分数据成字符串数组
