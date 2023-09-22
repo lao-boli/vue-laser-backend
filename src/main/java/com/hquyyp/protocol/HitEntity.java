@@ -7,12 +7,11 @@ import java.util.HashMap;
 @ToString(callSuper = true)
 public class HitEntity extends ProtoEntity {
 
-    int shootee;
-    int shooter;
-    boolean isUpdate;
-    int position;
-
-    String hitPart;
+    public int shootee;
+    public int shooter;
+    public boolean isUpdate;
+    public int position;
+    public String hitPart;
 
     public HitEntity(int type, int shootee, int shooter, int isUpdate, int position) {
         this(type, shootee, shooter, isUpdate == 1, position);
@@ -27,7 +26,7 @@ public class HitEntity extends ProtoEntity {
         setHitPart(position);
     }
 
-    private void setHitPart(int position){
+    private void setHitPart(int position) {
         switch (position) {
             case 1:
                 hitPart = "头部";
