@@ -9,6 +9,9 @@ import com.hquyyp.domain.model.SendDataModel;
 import com.hquyyp.domain.model.ShootWebSocketModel;
 import com.hquyyp.domain.po.BattleNewSetting;
 import com.hquyyp.domain.vo.NewVestView;
+import com.hquyyp.protocol.HitEntity;
+import com.hquyyp.protocol.PingEntity;
+import com.hquyyp.protocol.ProtoEntity;
 import com.hquyyp.utils.OutsiderUtil;
 import com.hquyyp.websocket.ShootWebSocket;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +23,8 @@ import java.util.logging.Logger;
 
 @Service
 public class NewVestService {
-    private static final Logger logger=Logger.getLogger(NewVestService.class.getName());
+
+    private static final Logger logger = Logger.getLogger(NewVestService.class.getName());
 
     @Autowired
     MqMessager mqMessager;
@@ -31,7 +35,7 @@ public class NewVestService {
     @Autowired
     private NewBattleService newBattleService;
 
-    protected List<NewVestView> vestEntityList=new ArrayList<>();
+    protected List<NewVestView> vestEntityList = new ArrayList<>();
 
     @Value("${mq.PublishTopicPrefix}")
     private String PublishTopicPrefix;
@@ -45,25 +49,25 @@ public class NewVestService {
         List<NewVestEntity> blueTeamList = JSONObject.parseArray(battleSettingEntity.getBlueTeamList(), NewVestEntity.class);
         List<NewVestEntity> redTeamList = JSONObject.parseArray(battleSettingEntity.getRedTeamList(), NewVestEntity.class);
 
-        for (NewVestEntity nve:blueTeamList){
-            NewVestView newVestView=new NewVestView(nve);
+        for (NewVestEntity nve : blueTeamList) {
+            NewVestView newVestView = new NewVestView(nve);
             newVestView.setTeam("blue");
             newVestView.setAmmo(0);
             newVestView.setHp(100);
             this.vestEntityList.add(newVestView);
-            NewRecordEntity newRecordEntity=NewRecordEntity.builder()
+            NewRecordEntity newRecordEntity = NewRecordEntity.builder()
                     .id(nve.getId()).name(nve.getName()).kill(0)
                     .team("blue").beShooted(0).shoot(0)
                     .build();
             this.newBattleService.recordData.add(newRecordEntity);
         }
-        for (NewVestEntity nve:redTeamList){
-            NewVestView newVestView=new NewVestView(nve);
+        for (NewVestEntity nve : redTeamList) {
+            NewVestView newVestView = new NewVestView(nve);
             newVestView.setTeam("red");
             newVestView.setAmmo(0);
             newVestView.setHp(100);
             this.vestEntityList.add(newVestView);
-            NewRecordEntity newRecordEntity=NewRecordEntity.builder()
+            NewRecordEntity newRecordEntity = NewRecordEntity.builder()
                     .id(nve.getId()).name(nve.getName()).kill(0)
                     .team("red").beShooted(0).shoot(0)
                     .build();
@@ -77,10 +81,10 @@ public class NewVestService {
     }
 
     public NewVestView getNewVest(Integer id) {
-        NewVestView newVestView=new NewVestView();
-        for (NewVestView nvv:this.vestEntityList) {
-            if (Integer.parseInt(nvv.getId()) == id){
-                newVestView=nvv;
+        NewVestView newVestView = new NewVestView();
+        for (NewVestView nvv : this.vestEntityList) {
+            if (Integer.parseInt(nvv.getId()) == id) {
+                newVestView = nvv;
             }
         }
         return newVestView;
@@ -91,15 +95,15 @@ public class NewVestService {
     }
 
     public void newSendDieData(int vestNum) {
-        for (NewVestView nvv:this.vestEntityList) {
-            if (Integer.parseInt(nvv.getId()) == vestNum){
+        for (NewVestView nvv : this.vestEntityList) {
+            if (Integer.parseInt(nvv.getId()) == vestNum) {
                 nvv.setHp(0);
-                String team=nvv.getTeam();
-                String  equipment = nvv.getEquipment();
-                String DieData="2 "+(("red".equals(team)) ? 1 : 0)+" "+equipment;
+                String team = nvv.getTeam();
+                String equipment = nvv.getEquipment();
+                String DieData = "2 " + (("red".equals(team)) ? 1 : 0) + " " + equipment;
                 try {
-                    mqMessager.send(PublishTopicPrefix+nvv.getEquipment()+PublishTopicSuffix,2,DieData);
-                }catch (Exception e){
+                    mqMessager.send(PublishTopicPrefix + nvv.getEquipment() + PublishTopicSuffix, 2, DieData);
+                } catch (Exception e) {
                     System.out.println("下发mqtt数据出现错误！！!");
                 }
             }
@@ -107,86 +111,83 @@ public class NewVestService {
     }
 
     public void newSendDieInjure(int vestNum, int injure) {
-        for (NewVestView nvv:this.vestEntityList) {
-            if (Integer.parseInt(nvv.getId()) == vestNum){
-                String team=nvv.getTeam();
-                String equipment=nvv.getEquipment();
-                String injureData="1 "+(("red".equals(team)) ? 1 : 0)+" "+equipment+" "+1;
+        for (NewVestView nvv : this.vestEntityList) {
+            if (Integer.parseInt(nvv.getId()) == vestNum) {
+                String team = nvv.getTeam();
+                String equipment = nvv.getEquipment();
+                String injureData = "1 " + (("red".equals(team)) ? 1 : 0) + " " + equipment + " " + 1;
                 try {
-                    if (injure<=0){
+                    if (injure <= 0) {
                         return;
-                    }
-                    else if (injure==1){
+                    } else if (injure == 1) {
                         nvv.setHp(66);
-                        mqMessager.send(PublishTopicPrefix+nvv.getEquipment()+PublishTopicSuffix,2,injureData);
-                    }
-                    else if (injure==2){
+                        mqMessager.send(PublishTopicPrefix + nvv.getEquipment() + PublishTopicSuffix, 2, injureData);
+                    } else if (injure == 2) {
                         nvv.setHp(33);
-                        mqMessager.send(PublishTopicPrefix+nvv.getEquipment()+PublishTopicSuffix,2,injureData);
-                        mqMessager.send(PublishTopicPrefix+nvv.getEquipment()+PublishTopicSuffix,2,injureData);
-                    }
-                    else{
+                        mqMessager.send(PublishTopicPrefix + nvv.getEquipment() + PublishTopicSuffix, 2, injureData);
+                        mqMessager.send(PublishTopicPrefix + nvv.getEquipment() + PublishTopicSuffix, 2, injureData);
+                    } else {
                         this.newSendDieData(vestNum);
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     System.out.println("下发mqtt数据出现错误！！!");
                 }
             }
         }
     }
 
-    public void NewAllLoadAmmo(int ammoNum){
-       for (NewVestView nvv:this.vestEntityList){
-           NewLoadAmmo(Integer.parseInt(nvv.getId()),ammoNum);
-       }
+    public void NewAllLoadAmmo(int ammoNum) {
+        for (NewVestView nvv : this.vestEntityList) {
+            NewLoadAmmo(Integer.parseInt(nvv.getId()), ammoNum);
+        }
     }
 
     public void NewLoadAmmo(int vestNum, int ammoNum) {
-        for (NewVestView nvv:this.vestEntityList){
-            if (Integer.parseInt(nvv.getId())==vestNum){
+        for (NewVestView nvv : this.vestEntityList) {
+            if (Integer.parseInt(nvv.getId()) == vestNum) {
                 int oldammo = nvv.getAmmo();
-                nvv.setAmmo(oldammo+ammoNum);
+                nvv.setAmmo(oldammo + ammoNum);
 
                 //下发mqtt装弹数据
-                SendDataModel sendDataModel=SendDataModel.builder()
+                SendDataModel sendDataModel = SendDataModel.builder()
                         .fPort(5).data(OutsiderUtil.intToBase64(ammoNum)).build();
                 try {
-                    mqMessager.send(PublishTopicPrefix+nvv.getEquipment()+PublishTopicSuffix,2,JSONObject.toJSONString(sendDataModel));
-                }catch (Exception e){
+                    mqMessager.send(PublishTopicPrefix + nvv.getEquipment() + PublishTopicSuffix, 2, JSONObject.toJSONString(sendDataModel));
+                } catch (Exception e) {
                     System.out.println("下发mqtt数据出现错误！！!");
                 }
             }
         }
     }
 
-    public void refreshVest(NewVestView newVestEntity){
-       this.vestEntityList.add(newVestEntity);
-       Collections.sort(this.vestEntityList);
+    public void refreshVest(NewVestView newVestEntity) {
+        this.vestEntityList.add(newVestEntity);
+        Collections.sort(this.vestEntityList);
     }
 
-    public void handleVestMqData(String data){
+    public void handleVestMqData(String data) {
         //fixed: when train is not started, receiving data will cause NPE.
-        if (this.vestEntityList == null){
+        if (this.vestEntityList == null) {
             return;
         }
-        logger.info("【mqtt接收】接收"+data);
-        String[] dataSplit=null;
+        logger.info("【mqtt接收】接收" + data);
+        String[] dataSplit = null;
         //拆分数据成字符串数组
-        try{
+        try {
             dataSplit = data.split(" ");
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.info("【mqtt接收】数据格式不符合规范");
         }
         //数据类型 射击者 被射击者 击中部位 是否是更新的数据
         //    0     1       2       3      4
-        if("91".equals(dataSplit[0])) {
+        if ("91".equals(dataSplit[0])) {
             //射击逻辑
             if (dataSplit.length == 5) {
                 // 如果标志位为0，说明不是更新的数据，即为重复发送的数据，丢弃
-                if (dataSplit[4].equals("0")){
+                if (dataSplit[4].equals("0")) {
                     return;
                 }
-                String position="";
+                String position = "";
                 switch (Integer.parseInt(dataSplit[3])) {
                     case 1:
                         position = "头部";
@@ -214,45 +215,45 @@ public class NewVestService {
                         break;
                 }
                 //射击者
-                NewVestView shooter=null;
-                NewVestView shootee=null;
-                for (NewVestView nvv:this.vestEntityList) {
-                    if (Integer.parseInt(nvv.getId()) == Integer.parseInt(dataSplit[1])){
-                        shooter=nvv;
+                NewVestView shooter = null;
+                NewVestView shootee = null;
+                for (NewVestView nvv : this.vestEntityList) {
+                    if (Integer.parseInt(nvv.getId()) == Integer.parseInt(dataSplit[1])) {
+                        shooter = nvv;
                     }
-                    if (Integer.parseInt(nvv.getId()) == Integer.parseInt(dataSplit[2])){
-                        shootee=nvv;
+                    if (Integer.parseInt(nvv.getId()) == Integer.parseInt(dataSplit[2])) {
+                        shootee = nvv;
                     }
                 }
-                if (shooter!=null && shootee!=null){
+                if (shooter != null && shootee != null) {
                     this.vestEntityList.remove(shootee);
                     //首先刷新被击中者血量
                     // 若hp大于34且被击中部位不是头部
                     if (shootee.getHp() > 34 && !"头部".equals(position)) {
-                        shootee.setHp(shootee.getHp()-33);
+                        shootee.setHp(shootee.getHp() - 33);
                         //非击杀数据
-                        for (NewRecordEntity nre:this.newBattleService.getRecordData()) {
+                        for (NewRecordEntity nre : this.newBattleService.getRecordData()) {
                             if (nre.getId() == shootee.getId()) {
                                 Integer beShooted = nre.getBeShooted();
                                 nre.setBeShooted(++beShooted);
                                 //System.out.println("shootee"+nre.toString());
                             }
-                            if (nre.getId()==shooter.getId()){
+                            if (nre.getId() == shooter.getId()) {
                                 Integer shoot = nre.getShoot();
                                 nre.setShoot(++shoot);
                                 //System.out.println("shooter"+nre.toString());
                             }
                         }
-                    } else if (shootee.getHp()<=34 || "头部".equals(position)){
+                    } else if (shootee.getHp() <= 34 || "头部".equals(position)) {
                         shootee.setHp(0);
                         //击杀数据
-                        for (NewRecordEntity nre:this.newBattleService.getRecordData()) {
+                        for (NewRecordEntity nre : this.newBattleService.getRecordData()) {
                             if (nre.getId() == shootee.getId()) {
                                 Integer beShooted = nre.getBeShooted();
                                 nre.setBeShooted(++beShooted);
                                 //System.out.println("shootee"+nre.toString());
                             }
-                            if (nre.getId()==shooter.getId()){
+                            if (nre.getId() == shooter.getId()) {
                                 Integer shoot = nre.getShoot();
                                 nre.setShoot(++shoot);
                                 Integer kill = nre.getKill();
@@ -265,9 +266,9 @@ public class NewVestService {
                     Collections.sort(this.newBattleService.getRecordData());
                     this.refreshVest(shootee);
                     //处理射击数据并做推送处理
-                    logger.info("【射击信息】"+shooter.getTeam()+"队的"+shooter.getId()+"号击中"+shootee.getTeam()+"队的"+shootee.getId()+"号的"+position+"部位");
+                    logger.info("【射击信息】" + shooter.getTeam() + "队的" + shooter.getId() + "号击中" + shootee.getTeam() + "队的" + shootee.getId() + "号的" + position + "部位");
                     //websocket推送回调
-                    ShootWebSocketModel shootWebSocketModel= ShootWebSocketModel.builder()
+                    ShootWebSocketModel shootWebSocketModel = ShootWebSocketModel.builder()
                             .mark("0").shooteeNum(shootee.getId()).shooteeTeam(shootee.getTeam())
                             .shooterTeam(shooter.getTeam()).shooterNum(shooter.getId())
                             .position(position).time(new Date())
@@ -278,7 +279,7 @@ public class NewVestService {
                     // } else {
                     //    log.info("【射击信息】不可射击队友!");
                     // }
-                }else {
+                } else {
                     logger.info("【mqtt接收】射击者或被射击者不存在");
                 }
             } else {
@@ -289,10 +290,10 @@ public class NewVestService {
         //    1     2       3        4         5        6           7
         if ("138".equals(dataSplit[0])) {
             if (dataSplit.length == 7) {
-                NewVestView newVestView=null;
-                for (NewVestView nvv:this.vestEntityList) {
-                    if (Integer.parseInt(nvv.getId()) == Integer.parseInt(dataSplit[1])){
-                        newVestView=nvv;
+                NewVestView newVestView = null;
+                for (NewVestView nvv : this.vestEntityList) {
+                    if (Integer.parseInt(nvv.getId()) == Integer.parseInt(dataSplit[1])) {
+                        newVestView = nvv;
                     }
                 }
                 this.vestEntityList.remove(newVestView);
@@ -304,14 +305,14 @@ public class NewVestService {
                     //       .ammo(Integer.parseInt(dataSplit[6])).lastReportTime(new Date())
                     //        .build();
                     //判断经纬度是否刷新，如果刷新推送到websocket
-                    Double lng=Double.parseDouble(dataSplit[2]);
-                    Double lat=Double.parseDouble(dataSplit[3]);
+                    Double lng = Double.parseDouble(dataSplit[2]);
+                    Double lat = Double.parseDouble(dataSplit[3]);
                     // double[] doubles = GpsCoordinateUtils.calWGS84toGCJ02(lat, lng);
                     //lat=doubles[0];
                     //lng=doubles[1];
                     //System.out.println("解析后的GCJ02为:经度"+lng+"纬度"+lat);
-                    if (newVestView.getLat()!=lat || newVestView.getLng()!= lng){
-                        PositionWebSocketModel positionWebSocketModel= PositionWebSocketModel.builder()
+                    if (newVestView.getLat() != lat || newVestView.getLng() != lng) {
+                        PositionWebSocketModel positionWebSocketModel = PositionWebSocketModel.builder()
                                 .mark("1").num(newVestView.getId())
                                 .lat(lat).lng(lng).time(new Date())
                                 .build();
@@ -319,12 +320,12 @@ public class NewVestService {
                     }
 
                     //做存亡处理
-                    int shootNum=Integer.parseInt(dataSplit[4])+Integer.parseInt(dataSplit[5]);
+                    int shootNum = Integer.parseInt(dataSplit[4]) + Integer.parseInt(dataSplit[5]);
                     int hp;
                     //若头部中弹，直接死亡
-                    if(shootNum<0 || shootNum>2 || Integer.parseInt(dataSplit[5]) >0){
-                        hp=0;
-                    }else {
+                    if (shootNum < 0 || shootNum > 2 || Integer.parseInt(dataSplit[5]) > 0) {
+                        hp = 0;
+                    } else {
                         hp = 100 - (33 * shootNum);
                     }
 
@@ -332,9 +333,9 @@ public class NewVestService {
                     //newVestView.setId(Integer.parseInt(dataSplit[2]));
                     newVestView.setLng(lng);
                     newVestView.setLat(lat);
-                    if (hp>=0){
+                    if (hp >= 0) {
                         newVestView.setHp(hp);
-                    }else {
+                    } else {
                         newVestView.setHp(0);
                     }
                     newVestView.setAmmo(Integer.parseInt(dataSplit[6]));
@@ -349,6 +350,9 @@ public class NewVestService {
             }
         }
         //
-        if ("2".equals(dataSplit[0])){}
+        if ("2".equals(dataSplit[0])) {
+        }
     }
+
+
 }
