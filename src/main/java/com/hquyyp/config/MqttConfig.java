@@ -4,7 +4,9 @@ package com.hquyyp.config;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.hquyyp.protocol.ProtoEntity;
 import com.hquyyp.service.NewVestService;
+import com.hquyyp.utils.ProtoParser;
 import com.hquyyp.websocket.ShootWebSocket;
 import com.sun.jersey.core.util.Base64;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -139,54 +141,10 @@ public class MqttConfig {
                 log.warning("Base64 decode fail: data: " + data);
                 return;
             }
-            String DATA = HexToString(decode);
-            //log.info("解析后数据："+ DATA);
-            vestService.handleVestMqData(DATA);
-           // shootWebSocket.sendMessage(data);
+
+            ProtoEntity entity = ProtoParser.decode(decode);
+            vestService.handleVestMqData(entity);
         };
     }
 
-    public String HexToString(byte[] bytes){
-        String DATA="";
-        int[] data=new int[bytes.length];
-        for (int i=0;i<bytes.length;i++){
-           data[i]= bytes[i] & 0xff;
-        }
-        log.info("received byte array: " + Arrays.toString(data));
-        log.info("convert to int array: " + Arrays.toString(bytes));
-        //位置报送
-        if (data.length==15){
-            int type=data[14];
-            int equipment=data[12]*256+data[13];
-            double lat=Double.parseDouble(""+(data[8]*256+data[9]))/100
-                    +Double.parseDouble(""+(data[10]*256+data[11]))/1000000;
-            double lng=Double.parseDouble(""+(data[4]*256+data[5]))/100
-                    +Double.parseDouble(""+(data[6]*256+data[7]))/1000000;
-            int backhit=data[3];
-            int headhit=data[2];
-            int leftammo=data[1];
-            DATA=type+" "+equipment+" "+
-                    lng+" "+lat+" "+backhit+" "+
-                    headhit+" "+leftammo;
-        }
-        //hit数据
-        if (data.length==6){
-            int type=data[5];
-            int shootee=data[3]*256+data[4];
-            int shooter=data[1]*256+data[2];
-            int position=data[0];
-            DATA=type+" "+shooter+" "+shootee+" "+position;
-        }
-        // 带state的hit数据
-        if (data.length==7){
-            int type=data[6];
-            int shootee=data[4]*256+data[5];
-            int shooter=data[2]*256+data[3];
-            int isUpdate=data[1];
-            int position=data[0];
-            DATA=type+" "+shooter+" "+shootee+" "+position+" "+isUpdate;
-            log.info("encode data: " + DATA);
-        }
-        return DATA;
-    }
 }

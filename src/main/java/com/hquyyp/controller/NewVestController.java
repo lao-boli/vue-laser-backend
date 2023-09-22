@@ -88,43 +88,6 @@ public class NewVestController {
                 .build();
     }
 
-    @GetMapping({"/test1"})
-    public BaseResponse test1() {
-//        MqttConfig mqtt = new MqttConfig();
-//        byte[] bytes = {0x40,0x00,0x00,0x01,0x00,0x02,0x5B};
-//        String s = mqtt.HexToString(bytes);
-//        vestService.handleVestMqData(s);
-        String data = "91 1 5 2 1";
-        vestService.handleVestMqData(data);
-
-        return BaseResponse.builder()
-                .code(200)
-                .status("SUCCESS")
-                .msg("")
-                .build();
-    }
-    @GetMapping({"/test2"})
-    public BaseResponse test2() {
-        String data = "91 10 2 4 1";
-        vestService.handleVestMqData(data);
-
-        return BaseResponse.builder()
-                .code(200)
-                .status("SUCCESS")
-                .msg("")
-                .build();
-    }
-
-    @GetMapping({"/test3"})
-    public BaseResponse test3() {
-        vestService.handleVestMqData("138 2 0.1 0.0 1 0 10");
-
-        return BaseResponse.builder()
-                .code(200)
-                .status("SUCCESS")
-                .msg("")
-                .build();
-    }
     @ApiOperation(value = "新全部装弹",httpMethod = "GET",notes="给全部人员装上指定数量弹药")
     @ApiImplicitParams({
             @ApiImplicitParam(name="ammoNum",value = "弹药数量",dataType = "int",paramType = "query")
