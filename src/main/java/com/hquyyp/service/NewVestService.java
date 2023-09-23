@@ -181,44 +181,40 @@ public class NewVestService {
     }
 
     public void handlePingData(PingEntity data) {
-        NewVestView newVestView = null;
-        for (NewVestView nvv : this.vestEntityList) {
-            if (Integer.parseInt(nvv.getId()) == data.number) {
-                newVestView = nvv;
-            }
-        }
-        this.vestEntityList.remove(newVestView);
-        if (newVestView != null) {
-            double lat = data.lat;
-            double lng = data.lng;
-
-            if (newVestView.getLat() != lat || newVestView.getLng() != lng) {
-                PositionWebSocketModel positionWebSocketModel = PositionWebSocketModel.builder()
-                        .mark("1").num(newVestView.getId())
-                        .lat(lat).lng(lng).time(new Date())
-                        .build();
-                shootWebSocket.sendMessage(positionWebSocketModel);
-            }
-
-            //做存亡处理
-            int hp;
-            //若头部中弹，直接死亡
-            if (data.headHit > 0) {
-                hp = 0;
-            } else {
-                hp = Math.max(100 - (33 * data.backHit), 0);
-            }
-
-            //刷新vestEntityMap中的数据
-            //newVestView.setId(Integer.parseInt(dataSplit[2]));
-            newVestView.setLng(lng);
-            newVestView.setLat(lat);
-            newVestView.setHp(hp);
-            newVestView.setAmmo(data.leftAmmo);
-            newVestView.setLastReportTime(new Date());
-        } else {
+        NewVestView newVestView = findVestView(data.number);
+        if (newVestView == null) {
             logger.info("【mqtt接收】" + data.number + "号马甲不存在");
+            return;
         }
+
+        this.vestEntityList.remove(newVestView);
+        double lat = data.lat;
+        double lng = data.lng;
+
+        if (newVestView.getLat() != lat || newVestView.getLng() != lng) {
+            PositionWebSocketModel positionWebSocketModel = PositionWebSocketModel.builder()
+                    .mark("1").num(newVestView.getId())
+                    .lat(lat).lng(lng).time(new Date())
+                    .build();
+            shootWebSocket.sendMessage(positionWebSocketModel);
+        }
+
+        //做存亡处理
+        int hp;
+        //若头部中弹，直接死亡
+        if (data.headHit > 0) {
+            hp = 0;
+        } else {
+            hp = Math.max(100 - (33 * data.backHit), 0);
+        }
+
+        //刷新vestEntityMap中的数据
+        //newVestView.setId(Integer.parseInt(dataSplit[2]));
+        newVestView.setLng(lng);
+        newVestView.setLat(lat);
+        newVestView.setHp(hp);
+        newVestView.setAmmo(data.leftAmmo);
+        newVestView.setLastReportTime(new Date());
         this.refreshVest(newVestView);
     }
 
@@ -226,67 +222,86 @@ public class NewVestService {
         if (!data.isUpdate) {
             return;
         }
-        NewVestView shooter = null;
-        NewVestView shootee = null;
-        for (NewVestView nvv : this.vestEntityList) {
-            if (Integer.parseInt(nvv.getId()) == data.shooter) {
-                shooter = nvv;
-            }
-            if (Integer.parseInt(nvv.getId()) == data.shootee) {
-                shootee = nvv;
+
+        NewVestView shootee = findVestView(data.shootee);
+        NewVestView shooter = findVestView(data.shooter);
+        if (shooter == null || shootee == null) {
+            return;
+        }
+
+        // 更新数据
+        vestEntityList.remove(shootee);
+        // 若hp小于34且被击中部位是头部,则为击杀数据
+        boolean isKill = shootee.getHp() <= 34 || "头部".equals(data.hitPart);
+        if (isKill) {
+            shootee.setHp(0);
+        } else {
+            shootee.setHp(shootee.getHp() - 33);
+        }
+        updateRecord(isKill, shootee.getId(), shooter.getId());
+
+        refreshVest(shootee);
+
+        //通过websocket推送击中数据
+        logger.info("【射击信息】" + shooter.getTeam() + "队的" + shooter.getId() + "号击中" + shootee.getTeam() + "队的" + shootee.getId() + "号的" + data.hitPart + "部位");
+        ShootWebSocketModel shootWebSocketModel = ShootWebSocketModel.builder()
+                .mark("0").shooteeNum(shootee.getId()).shooteeTeam(shootee.getTeam())
+                .shooterTeam(shooter.getTeam()).shooterNum(shooter.getId())
+                .position(data.hitPart).time(new Date())
+                .build();
+        shootWebSocket.sendMessage(shootWebSocketModel);
+    }
+
+    /**
+     * 更新作战记录
+     *
+     * @param isKill    是否是击杀数据
+     * @param shooteeId 受击士兵编号
+     * @param shooterId 射击士兵编号
+     */
+    private void updateRecord(boolean isKill, String shooteeId, String shooterId) {
+        NewRecordEntity shooteeRecord = findRecord(shooteeId);
+        if (shooteeRecord != null) {
+            Integer beShooted = shooteeRecord.getBeShooted();
+            shooteeRecord.setBeShooted(++beShooted);
+        }
+
+        NewRecordEntity shooterRecord = findRecord(shooterId);
+        if (shooterRecord != null) {
+            Integer shoot = shooterRecord.getShoot();
+            shooterRecord.setShoot(++shoot);
+            if (isKill) {
+                Integer kill = shooterRecord.getKill();
+                shooterRecord.setKill(++kill);
             }
         }
-        if (shooter != null && shootee != null) {
-            this.vestEntityList.remove(shootee);
-            //首先刷新被击中者血量
-            // 若hp大于34且被击中部位不是头部
-            if (shootee.getHp() > 34 && !"头部".equals(data.hitPart)) {
-                shootee.setHp(shootee.getHp() - 33);
-                //非击杀数据
-                for (NewRecordEntity nre : this.newBattleService.getRecordData()) {
-                    if (Objects.equals(nre.getId(), shootee.getId())) {
-                        Integer beShooted = nre.getBeShooted();
-                        nre.setBeShooted(++beShooted);
-                        //System.out.println("shootee"+nre.toString());
-                    }
-                    if (Objects.equals(nre.getId(), shooter.getId())) {
-                        Integer shoot = nre.getShoot();
-                        nre.setShoot(++shoot);
-                        //System.out.println("shooter"+nre.toString());
-                    }
-                }
-            } else if (shootee.getHp() <= 34 || "头部".equals(data.hitPart)) {
-                shootee.setHp(0);
-                //击杀数据
-                for (NewRecordEntity nre : this.newBattleService.getRecordData()) {
-                    if (Objects.equals(nre.getId(), shootee.getId())) {
-                        Integer beShooted = nre.getBeShooted();
-                        nre.setBeShooted(++beShooted);
-                        //System.out.println("shootee"+nre.toString());
-                    }
-                    if (Objects.equals(nre.getId(), shooter.getId())) {
-                        Integer shoot = nre.getShoot();
-                        nre.setShoot(++shoot);
-                        Integer kill = nre.getKill();
-                        nre.setKill(++kill);
-                    }
-                }
-            }
-            //System.out.println("记录list："+JSONObject.toJSONString(this.newBattleService.getRecordData()));
-            //System.out.println(JSONObject.toJSONString();
-            Collections.sort(this.newBattleService.getRecordData());
-            this.refreshVest(shootee);
-            //处理射击数据并做推送处理
-            logger.info("【射击信息】" + shooter.getTeam() + "队的" + shooter.getId() + "号击中" + shootee.getTeam() + "队的" + shootee.getId() + "号的" + data.hitPart + "部位");
-            //websocket推送回调
-            ShootWebSocketModel shootWebSocketModel = ShootWebSocketModel.builder()
-                    .mark("0").shooteeNum(shootee.getId()).shooteeTeam(shootee.getTeam())
-                    .shooterTeam(shooter.getTeam()).shooterNum(shooter.getId())
-                    .position(data.hitPart).time(new Date())
-                    .build();
-            //通过websocket推送击中数据
-            shootWebSocket.sendMessage(shootWebSocketModel);
-        }
+        Collections.sort(newBattleService.getRecordData());
+    }
+
+    /**
+     * 根据编号查找 {@link NewBattleService#recordData} 中存在的 {@link NewRecordEntity}对象
+     *
+     * @param id 士兵编号
+     * @return 若找到则返回 {@link NewRecordEntity} 对象，否则返回null.
+     */
+    private NewRecordEntity findRecord(String id) {
+        return newBattleService.getRecordData().stream()
+                .filter(nre -> Objects.equals(nre.getId(), id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * 根据编号查找 {@link #vestEntityList} 中存在的 {@link NewVestView}对象
+     *
+     * @param id 士兵编号
+     * @return 若找到则返回 {@link NewVestView} 对象，否则返回null.
+     */
+    private NewVestView findVestView(int id) {
+        return vestEntityList.stream()
+                .filter(nvv -> Integer.parseInt(nvv.getId()) == id)
+                .findFirst()
+                .orElse(null);
     }
 
 }
