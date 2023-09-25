@@ -77,16 +77,6 @@ public class NewVestService {
         return this.vestEntityList;
     }
 
-    public NewVestView getNewVest(Integer id) {
-        NewVestView newVestView = new NewVestView();
-        for (NewVestView nvv : this.vestEntityList) {
-            if (Integer.parseInt(nvv.getId()) == id) {
-                newVestView = nvv;
-            }
-        }
-        return newVestView;
-    }
-
     public void clearAllVest() {
         this.vestEntityList.clear();
     }
@@ -293,7 +283,7 @@ public class NewVestService {
      * @param id 士兵编号
      * @return 若找到则返回 {@link NewVestView} 对象，否则返回null.
      */
-    private NewVestView findVestView(int id) {
+    public NewVestView findVestView(int id) {
         return vestEntityList.stream()
                 .filter(nvv -> Integer.parseInt(nvv.getId()) == id)
                 .findFirst()

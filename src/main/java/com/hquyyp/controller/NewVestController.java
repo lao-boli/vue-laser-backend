@@ -49,7 +49,7 @@ public class NewVestController {
         return BaseResponse.builder()
                 .code(200)
                 .status("SUCCESS")
-                .data(this.vestService.getNewVest(vestNum))
+                .data(this.vestService.findVestView(vestNum))
                 .msg("")
                 .build();
     }
