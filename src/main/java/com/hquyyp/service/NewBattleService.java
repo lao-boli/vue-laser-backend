@@ -143,6 +143,8 @@ public class NewBattleService {
         this.newBattleEntity = newBattleEntity;
 
         this.recordData=new ArrayList<>();
+        // fixed: 第二次开始训练后，recorddata是上一次的训练记录,故需要重置为null.
+        newRecordService.recordData = null;
 
         //初始化vestMap容器以及数据统计容器
         this.vestService.NewLoadVest(battleSettingEntity);
