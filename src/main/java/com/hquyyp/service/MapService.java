@@ -13,10 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -24,6 +26,7 @@ import java.util.logging.Logger;
 
 @Service
 public class MapService {
+
     private static final Logger log = Logger.getLogger(com.hquyyp.service.MapService.class.getName());
 
     @Autowired
@@ -43,17 +46,17 @@ public class MapService {
 
     private ExecutorService mapThreadPool = Executors.newSingleThreadExecutor();
 
-    public void addMap(MultipartFile file, CreateMapRequest createMapRequest){
-        String mapPath="";
-        if ("0".equals(IN_LINUX)){
+    public void addMap(MultipartFile file, CreateMapRequest createMapRequest) {
+        String mapPath = "";
+        if ("0".equals(IN_LINUX)) {
             //组合文件路径
             //windows环境
-             mapPath = MAP_DIR + createMapRequest.getId() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+            mapPath = MAP_DIR + createMapRequest.getId() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
 
-        }else if ("1".equals(IN_LINUX)){
+        } else if ("1".equals(IN_LINUX)) {
             //linux环境
-             mapPath = LINUX_MAP_DIR + createMapRequest.getId() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-        }else {
+            mapPath = LINUX_MAP_DIR + createMapRequest.getId() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        } else {
             log.info("IN_LINUX参数未配置！！！");
         }
 
@@ -64,7 +67,7 @@ public class MapService {
         try {
             //直接将传入file对象的输入流转换成文件
             OutsiderUtil.streamToFile(file.getInputStream(), new FileOutputStream(imgFile));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.info("【地图管理】图片数据流转存出现错误！");
         }
 
@@ -83,7 +86,7 @@ public class MapService {
     }
 
     public ArrayList<MapEntity> listMapByQuery() {
-       return  this.mapEntityMapper.listMapByQuery();
+        return this.mapEntityMapper.listMapByQuery();
     }
 
     public PageInfo<MapEntity> listMapByQueryPage(MapQueryEntity mapQueryEntity) {
@@ -94,8 +97,15 @@ public class MapService {
     public void initMapThread(String mapId) throws IOException {
         endMapThread();
         MapEntity mapEntity = this.mapEntityMapper.selectByPrimaryKey(mapId);
+        // fixed: npe caused by starting battles when the map does not exist.
+        // TODO: add globe exception handler to tell front
+        if (mapEntity == null) {
+            log.warning("map not exist, input mapId: "+ mapId);
+            throw new NoSuchElementException("map not exist");
+        }
         this.mapThread = new MapThread(mapEntity);
         this.mapThreadPool.submit((Runnable) this.mapThread);
+
     }
 
     public void endMapThread() {
@@ -103,6 +113,7 @@ public class MapService {
             this.mapThread.stop();
         }
     }
+
 }
 
 
