@@ -7,10 +7,28 @@ import java.util.HashMap;
 @ToString(callSuper = true)
 public class HitEntity extends ProtoEntity {
 
+    /**
+     * 受击者编号
+     */
     public int shootee;
+    /**
+     * 射击者编号
+     */
     public int shooter;
+    /**
+     * 是否是要更新的射击数据flag
+     */
     public boolean isUpdate;
+
+    /**
+     * 击中部位编码 {@link #setHitPart(int)}
+     *
+     */
     public int position;
+
+    /**
+     * 转换后的击中部位,{@link #setHitPart(int)}
+     */
     public String hitPart;
 
     public HitEntity(int type, int shootee, int shooter, int isUpdate, int position) {
