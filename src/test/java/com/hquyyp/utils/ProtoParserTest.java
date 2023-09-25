@@ -3,8 +3,12 @@ package com.hquyyp.utils;
 import com.hquyyp.protocol.HitEntity;
 import com.hquyyp.protocol.PingEntity;
 import com.hquyyp.protocol.ProtoEntity;
+import com.sun.jersey.core.util.Base64;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.*;
 
@@ -48,5 +52,27 @@ public class ProtoParserTest {
         System.out.println(result);
         assertEquals(except.toString(), result.toString());
     }
+
+    @Test
+    public void encodeHit() {
+        // 蓝队的94号击中了红队的12号的后甲
+        byte[] data1 = new byte[]{0x40,0x01,0x00,0x5e,0x00,0x0c,0x5B};
+        // 蓝队的94号击中了红队的12号的头部
+        byte[] data2 = new byte[]{0x01,0x01,0x00,0x5e,0x00,0x0c,0x5b};
+        // byte[] data1 = new byte[]{0, -128, 0, 0, 46, 62, 4, -47, 9, -104, 13, 18, 0, 12, -118};
+        System.out.println(new String(Base64.encode(data1), StandardCharsets.UTF_8));
+        System.out.println(new String(Base64.encode(data2), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void encodePing() {
+        // 蓝队的94号击中了红队的12号的后甲
+        byte[] data1 = new byte[]{0, -128, 1, 0, 46, 62, 4, -47, 9, -104, 13, 18, 0, 12, -118};
+        // 蓝队的94号击中了红队的12号的头部
+        byte[] data2 = new byte[]{0, -128, 0, 2, 46, 62, 4, -47, 9, -104, 13, 18, 0, 12, -118};
+        System.out.println(new String(Base64.encode(data1), StandardCharsets.UTF_8));
+        System.out.println(new String(Base64.encode(data2), StandardCharsets.UTF_8));
+    }
+
 
 }
