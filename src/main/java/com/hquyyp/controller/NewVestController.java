@@ -1,9 +1,7 @@
 package com.hquyyp.controller;
 
-import com.hquyyp.config.MqttConfig;
 import com.hquyyp.domain.dto.response.BaseResponse;
 import com.hquyyp.service.NewVestService;
-import com.sun.jersey.core.util.Base64;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -94,7 +92,7 @@ public class NewVestController {
     })
     @GetMapping({"/newloadall"})
     public BaseResponse NewAllLoadAmmo(@RequestParam("ammoNum") int ammoNum){
-        this.vestService.NewAllLoadAmmo(ammoNum);
+        this.vestService.allLoadAmmo(ammoNum);
         return BaseResponse.builder()
                 .code(200)
                 .status("SUCCESS")
@@ -109,7 +107,7 @@ public class NewVestController {
     })
     @GetMapping({"/newloadone"})
     public BaseResponse NewLoadAmmo(@RequestParam("ammoNum") int ammoNum,@RequestParam("vestNum") int vestNum){
-        this.vestService.NewLoadAmmo(vestNum,ammoNum);
+        this.vestService.loadAmmo(vestNum, ammoNum);
         return BaseResponse.builder()
                 .code(200)
                 .status("SUCCESS")

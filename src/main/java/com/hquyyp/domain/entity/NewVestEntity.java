@@ -4,24 +4,36 @@ import com.hquyyp.domain.vo.NewVestView;
 import lombok.Builder;
 
 @Builder
-public class NewVestEntity implements Comparable<NewVestView>{
+public class NewVestEntity implements Comparable<NewVestView> {
 
-    //人员编号
+    /**
+     * 人员编号
+     */
     private String id;
 
-    //人员姓名
+    /**
+     * 人员姓名
+     */
     private String name;
 
-    //人员性别
+    /**
+     * 人员性别
+     */
     private String gender;
 
-    //年龄
+    /**
+     * 年龄
+     */
     private String age;
 
-    //所属单位
+    /**
+     * 所属单位
+     */
     private String unit;
 
-    //装备套装编号
+    /**
+     * 装备套装编号(device EUI)
+     */
     private String equipment;
 
     public NewVestEntity() {
@@ -98,6 +110,7 @@ public class NewVestEntity implements Comparable<NewVestView>{
 
     @Override
     public int compareTo(NewVestView o) {
-        return Integer.parseInt(this.id)-Integer.parseInt(o.getId());
+        return Integer.parseInt(this.id) - Integer.parseInt(o.getId());
     }
+
 }

@@ -123,27 +123,35 @@ public class NewVestService {
         }
     }
 
-    public void NewAllLoadAmmo(int ammoNum) {
-        for (NewVestView nvv : this.vestEntityList) {
-            NewLoadAmmo(Integer.parseInt(nvv.getId()), ammoNum);
+    public void allLoadAmmo(int ammoNum) {
+        for (NewVestView nvv : vestEntityList) {
+            updateAmmo(ammoNum, nvv);
         }
     }
 
-    public void NewLoadAmmo(int vestNum, int ammoNum) {
-        for (NewVestView nvv : this.vestEntityList) {
-            if (Integer.parseInt(nvv.getId()) == vestNum) {
-                int oldammo = nvv.getAmmo();
-                nvv.setAmmo(oldammo + ammoNum);
+    public void loadAmmo(int vestNum, int ammoNum) {
+        NewVestView vestView = findVestView(vestNum);
+        if (vestView != null) {
+            updateAmmo(ammoNum, vestView);
+        }
+    }
 
-                //下发mqtt装弹数据
-                SendDataModel sendDataModel = SendDataModel.builder()
-                        .fPort(5).data(OutsiderUtil.intToBase64(ammoNum)).build();
-                try {
-                    mqMessager.send(PublishTopicPrefix + nvv.getEquipment() + PublishTopicSuffix, 2, JSONObject.toJSONString(sendDataModel));
-                } catch (Exception e) {
-                    System.out.println("下发mqtt数据出现错误！！!");
-                }
-            }
+    /**
+     * 更新子弹数量,并下发装弹mqtt指令.(目前仅增加子弹)
+     * @param ammoNum 装弹数量
+     * @param vestView 要更新子弹数量的马甲数据类
+     */
+    private void updateAmmo(int ammoNum, NewVestView vestView) {
+
+        int oldAmmo = vestView.getAmmo();
+        vestView.setAmmo(oldAmmo + ammoNum);
+
+        SendDataModel sendDataModel = SendDataModel.builder()
+                .fPort(5).data(OutsiderUtil.intToBase64(ammoNum)).build();
+        try {
+            mqMessager.send(PublishTopicPrefix + vestView.getEquipment() + PublishTopicSuffix, 2, JSONObject.toJSONString(sendDataModel));
+        } catch (Exception e) {
+            logger.warning("Failed to issue mqtt instruction: " + e);
         }
     }
 
