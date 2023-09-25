@@ -164,10 +164,9 @@ public class NewVestService {
 
     public void handleVestMqData(ProtoEntity data) {
         //fixed: when train is not started, receiving data will cause NPE.
-        if (this.vestEntityList == null) {
+        if (vestEntityList == null || vestEntityList.isEmpty()) {
             return;
         }
-        logger.info("【mqtt接收】接收" + data);
         if (data instanceof HitEntity) {
             handleHitData((HitEntity) data);
         }

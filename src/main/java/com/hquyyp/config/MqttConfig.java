@@ -143,6 +143,8 @@ public class MqttConfig {
             }
 
             ProtoEntity entity = ProtoParser.decode(decode);
+
+            log.info("mqtt data parse: " + data);
             vestService.handleVestMqData(entity);
         };
     }
