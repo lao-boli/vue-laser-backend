@@ -2,6 +2,7 @@ package com.hquyyp.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hquyyp.MqttInterface.MqMessager;
+import com.hquyyp.domain.entity.NewBattleSettingEntity;
 import com.hquyyp.domain.entity.NewRecordEntity;
 import com.hquyyp.domain.entity.NewVestEntity;
 import com.hquyyp.domain.model.PositionWebSocketModel;
@@ -46,30 +47,26 @@ public class NewVestService {
 
     public void NewLoadVest(BattleNewSetting battleSettingEntity) {
         this.vestEntityList.clear();
-        List<NewVestEntity> blueTeamList = JSONObject.parseArray(battleSettingEntity.getBlueTeamList(), NewVestEntity.class);
-        List<NewVestEntity> redTeamList = JSONObject.parseArray(battleSettingEntity.getRedTeamList(), NewVestEntity.class);
+        initVestListAndRecord(battleSettingEntity.getBlueTeamList(), "blue");
+        initVestListAndRecord(battleSettingEntity.getRedTeamList(), "red");
+    }
 
+    /**
+     * 初始化马甲列表和作战记录
+     * @param teamList 队伍列表, 应为 {@link NewBattleSettingEntity#getBlueTeamList()} 或 {@link NewBattleSettingEntity#getRedTeamList()}
+     * @param team 队伍名称, "blue" 或 "red"
+     */
+    private void initVestListAndRecord(String teamList, String team) {
+        List<NewVestEntity> blueTeamList = JSONObject.parseArray(teamList, NewVestEntity.class);
         for (NewVestEntity nve : blueTeamList) {
             NewVestView newVestView = new NewVestView(nve);
-            newVestView.setTeam("blue");
+            newVestView.setTeam(team);
             newVestView.setAmmo(0);
             newVestView.setHp(100);
             this.vestEntityList.add(newVestView);
             NewRecordEntity newRecordEntity = NewRecordEntity.builder()
                     .id(nve.getId()).name(nve.getName()).kill(0)
-                    .team("blue").beShooted(0).shoot(0)
-                    .build();
-            this.newBattleService.recordData.add(newRecordEntity);
-        }
-        for (NewVestEntity nve : redTeamList) {
-            NewVestView newVestView = new NewVestView(nve);
-            newVestView.setTeam("red");
-            newVestView.setAmmo(0);
-            newVestView.setHp(100);
-            this.vestEntityList.add(newVestView);
-            NewRecordEntity newRecordEntity = NewRecordEntity.builder()
-                    .id(nve.getId()).name(nve.getName()).kill(0)
-                    .team("red").beShooted(0).shoot(0)
+                    .team(team).beShooted(0).shoot(0)
                     .build();
             this.newBattleService.recordData.add(newRecordEntity);
         }
