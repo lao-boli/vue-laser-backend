@@ -253,7 +253,7 @@ public class NewVestService {
     }
 
     /**
-     * 更新作战记录
+     * 更新作战记录,并重新排序.
      *
      * @param isKill    是否是击杀数据
      * @param shooteeId 受击士兵编号
